@@ -1,0 +1,60 @@
+import { Router } from "express";
+import AWS from 'aws-sdk'
+import config from '../config'
+import multer from 'multer'
+import Image from '../models/images'
+//import uploadFile from '../middleware/multer'
+
+const router = Router()
+
+
+var upload = multer()
+const spacesEndpoint = new AWS.Endpoint(config.Endpoint)
+
+const s3 = new AWS.S3({
+    endpoint:spacesEndpoint
+})
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, '/public/files');
+    },
+   
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+   
+var upload = multer({ storage: storage })
+
+router.post('/api/images/upload',upload.array('filesI'), async (req, res)=>{	
+
+
+})
+
+
+
+router.get('/api/images/', async (req, res)=>{
+    const images = await Image.find();
+    return res.json(images)
+})
+
+router.get('/api/images/:id', async (req, res)=>{
+    const image = await Image.findById(req.params.id)
+    return res.json(image)
+})
+
+router.delete('/api/images/:id', async (req, res)=>{
+    console.log(req.params.id)
+    var image = await Image.findById(req.params.id)
+   
+ 
+    const deleteImage = await Image.findByIdAndDelete(req.params.id);
+    
+ 
+
+    res.json(deleteImage)
+})
+
+
+export default router
